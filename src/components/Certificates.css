@@ -1,20 +1,27 @@
-.certificates {
-    padding: 30px;
-    background-color: #f9f9f9;
-  }
-  
-  .certificates h2 {
-    color: #282c34;
-    margin-bottom: 20px;
-  }
-  
-  .certificates ul {
-    list-style-type: square;
-    margin-left: 20px;
-  }
-  
-  .certificates ul li {
-    margin-bottom: 10px;
-    color: #555;
-  }
-  
+.certificates{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 30px;
+}
+
+.certificate-slide{
+  max-width: 80%; /* Limit the width of the slides */
+  margin: 0 auto; /* Center the slides */
+  background: #007acc;
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.slick-slider {
+  width: 100%;
+  max-width: 800px; /* Set a maximum width for the slider */
+}
+
+.slick-dots {
+  margin-top: 20px;
+}

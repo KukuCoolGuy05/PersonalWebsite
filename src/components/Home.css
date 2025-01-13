@@ -1,18 +1,24 @@
-.home {
+#home {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 25vh;
+  background: linear-gradient(to bottom, #007bff, #e0e0e0);
+  color: #fff;
   text-align: center;
-  padding: 50px;
 }
 
-.typing-animation {
-  font-size: 2em;
-  font-family: 'Poppins', sans-serif;
-  color: #282c34;
+.home-container h1 {
+  font-size: 4rem;
+  margin-bottom: 0.5rem;
+}
+
+.typewriter {
+  display: inline-block;
   overflow: hidden;
-  border-right: 2px solid #282c34;
   white-space: nowrap;
-  margin: 0 auto;
-  letter-spacing: 2px;
-  animation: typing 3s steps(30, end), blink 0.8s infinite step-end alternate;
+  border-right: 2px solid #fff;
+  animation: typing 2s steps(20, end), blink 0.5s step-end infinite alternate;
 }
 
 @keyframes typing {
@@ -20,15 +26,12 @@
     width: 0;
   }
   to {
-    width: 15ch;
+    width: 100%;
   }
 }
 
 @keyframes blink {
-  from {
+  50% {
     border-color: transparent;
-  }
-  to {
-    border-color: #282c34;
   }
 }

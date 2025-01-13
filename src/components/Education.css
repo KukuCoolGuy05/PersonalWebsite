@@ -1,19 +1,37 @@
-.education {
-    padding: 30px;
-    border-top: 1px solid #ddd;
-  }
-  
-  .education h2 {
-    color: #282c34;
-    margin-bottom: 20px;
-  }
-  
-  .education ul {
-    list-style-type: disc;
-    margin-left: 20px;
-  }
-  
-  .education ul li {
-    margin-bottom: 10px;
-  }
-  
+#education {
+  padding: 2rem;
+  background: #f9f9f9;
+}
+
+h2 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.education-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.education-card {
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  text-align: center;
+  padding: 1.5rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Simpler transition */
+}
+
+.education-card:hover {
+  transform: scale(1.05); /* Smooth scaling */
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+}
+
+.edu-logo {
+  width: 80px;
+  height: auto;
+  margin-bottom: 1rem;
+}

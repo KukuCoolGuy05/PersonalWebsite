@@ -1,23 +1,58 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+@import '~slick-carousel/slick/slick.css';
+@import '~slick-carousel/slick/slick-theme.css';
 
 body {
-  font-family: 'Poppins', sans-serif;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  background-color: #f4f4f9;
-  color: #333;
-}
-
-h1, h2, h3 {
-  font-weight: bold;
-}
-
-ul {
+  font-size: 18px;
+  line-height: 1.6;
   padding: 0;
   margin: 0;
 }
 
-li {
-  list-style: none;
+h1, h2 {
+  font-size: 2em;
+}
+
+p {
+  font-size: 1.2em;
+}
+
+@media (max-width: 768px) {
+  body {
+    font-size: 16px;
+  }
+
+  h1, h2 {
+    font-size: 1.8em;
+  }
+
+  p {
+    font-size: 1em;
+  }
+
+  .slick-slider {
+    max-width: 90%;
+  }
+
+  .certificate-slide,
+  .experience-slide {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 14px;
+  }
+
+  h1, h2 {
+    font-size: 1.5em;
+  }
+
+  p {
+    font-size: 0.9em;
+  }
+
+  .slick-slider {
+    max-width: 100%;
+  }
 }
