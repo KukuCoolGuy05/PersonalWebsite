@@ -1,0 +1,19 @@
+.education {
+    padding: 30px;
+    border-top: 1px solid #ddd;
+  }
+  
+  .education h2 {
+    color: #282c34;
+    margin-bottom: 20px;
+  }
+  
+  .education ul {
+    list-style-type: disc;
+    margin-left: 20px;
+  }
+  
+  .education ul li {
+    margin-bottom: 10px;
+  }
+  

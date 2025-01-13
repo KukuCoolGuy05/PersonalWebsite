@@ -1,0 +1,34 @@
+.home {
+  text-align: center;
+  padding: 50px;
+}
+
+.typing-animation {
+  font-size: 2em;
+  font-family: 'Poppins', sans-serif;
+  color: #282c34;
+  overflow: hidden;
+  border-right: 2px solid #282c34;
+  white-space: nowrap;
+  margin: 0 auto;
+  letter-spacing: 2px;
+  animation: typing 3s steps(30, end), blink 0.8s infinite step-end alternate;
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 15ch;
+  }
+}
+
+@keyframes blink {
+  from {
+    border-color: transparent;
+  }
+  to {
+    border-color: #282c34;
+  }
+}

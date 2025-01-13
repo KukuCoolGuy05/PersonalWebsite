@@ -1,0 +1,13 @@
+.header {
+  background: linear-gradient(90deg, #007ACC, #00C851);
+  color: white;
+  text-align: center;
+  padding: 20px;
+  font-size: 2em;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header h1 {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+}
