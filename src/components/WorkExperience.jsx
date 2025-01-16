@@ -6,15 +6,18 @@ const WorkExperience = () => {
   const experiences = [
     {
       title: 'Code Sensei',
-      description: 'Taught programming and robotics to students aged 5-16 at Code Ninjas.',
+      description:
+        'Led engaging sessions in LEGO robotics, Roblox development, web development, and stop-motion animation for students aged 5–16. Created a supportive environment that inspired student growth in both technical skills and teamwork.',
     },
     {
       title: 'Mentor at Kumon',
-      description: 'Guided students in Math and English, promoting a safe learning environment.',
+      description:
+        'Provided personalized mentorship in advanced Math and English concepts. Fostered a safe learning environment that promoted student improvement and self-confidence.',
     },
     {
-      title: 'Intern at Doodle Inc.',
-      description: 'Developed an optimized interview scheduling system using Julia and JuMP.',
+      title: 'Chess Instructor',
+      description:
+        'Designed and implemented a chess curriculum, helping students improve openings, tactics, and endgame strategies. Successfully guided students to participate in tournaments.',
     },
   ];
 
@@ -26,6 +29,7 @@ const WorkExperience = () => {
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 3000,
+    arrows: true,
   };
 
   return (

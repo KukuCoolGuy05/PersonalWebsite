@@ -1,6 +1,5 @@
 #projects {
   padding: 2rem;
-  background: linear-gradient(to bottom, #e0e0e0, #007bff);
 }
 
 h2 {
@@ -18,6 +17,7 @@ h2 {
 }
 
 .project-card {
+  color: #333;
   background: #fff;
   border-radius: 10px;
   padding: 1.5rem;

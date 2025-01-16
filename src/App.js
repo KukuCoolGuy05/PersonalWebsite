@@ -19,9 +19,9 @@ function App() {
       <div className="App background">
         <Home />
         <Education />
+        <Projects />
+        <WorkExperience />
       </div>
-      <Projects />
-      <WorkExperience />
       <Courses />
       <Awards />
       <Contact />

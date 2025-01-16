@@ -1,7 +1,7 @@
 import React from "react";
 import "./Education.css";
-import uwLogo from "./uw-logo.png"; // Add UW Madison logo
-import stevensonLogo from "./stevenson-logo.png"; // Add Adlai E. Stevenson logo
+import uwLogo from "./images/uw-logo.png";
+import stevensonLogo from "./images/stevenson-logo.png";
 
 const Education = () => {
   const educationData = [

@@ -1,27 +1,85 @@
 .work-experience {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 30px;
+  padding: 2rem;
+  max-width: 800px;
+  margin: 50px auto;
+  font-family: 'Roboto', sans-serif;
 }
 
-.experience-slide {
-  max-width: 80%; /* Limit the width of the slides */
-  margin: 0 auto; /* Center the slides */
-  background: #007acc;
-  color: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+.work-experience h2 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #ffffff;
 }
 
 .slick-slider {
-  width: 100%;
-  max-width: 800px; /* Set a maximum width for the slider */
+  display: flex;
+  justify-content: center;
+}
+
+.experience-slide {
+  background: #ffffff;
+  color: #333333;
+  border-radius: 10px;
+  padding: 1.5rem;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+  max-width: 45rem;
+  text-align: left;
+  margin: 1rem;
+}
+
+.experience-slide:hover {
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+.experience-slide h3 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: #444444;
+  font-weight: bold;
+}
+
+.experience-slide p {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #555555;
 }
 
 .slick-dots {
   margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.slick-dots li button:before {
+  color: #bbb;
+  font-size: 0.8rem;
+}
+
+.slick-dots li.slick-active button:before {
+  color: #ffffff;
+}
+
+.slick-arrow:hover {
+  color: #00aaff;
+}
+
+
+@media (max-width: 768px) {
+  .experience-slide {
+    max-width: 90%;
+  }
+
+  .work-experience h2 {
+    font-size: 1.5rem;
+  }
+
+  .experience-slide h3 {
+    font-size: 1.1rem;
+  }
+
+  .experience-slide p {
+    font-size: 0.9rem;
+  }
 }

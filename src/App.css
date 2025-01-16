@@ -1,16 +1,24 @@
 .background {
-  background: linear-gradient(to bottom, #007bff, #6a11cb, #2575fc); /* Smooth gradient */
+  background: linear-gradient(-45deg, #007bff, #6a11cb, #2575fc, #ff8c00);
+  background-size: 400% 400%;
+  animation: gradientAnimation 10s ease infinite;
   color: white;
-  padding: 2rem 0;
 }
+
+@keyframes gradientAnimation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 
 #home-education {
   display: flex;
-  flex-direction: column; /* Stacks elements vertically */
   justify-content: center;
   align-items: center;
-  height: 50vh; /* Increase height for better visual balance */
+  height: 18vh;
   text-align: center;
+  flex-direction: column;
 }
 
 #education {
@@ -48,9 +56,9 @@ h2 {
 
 .education-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Wider min-width */
-  gap: 2rem; /* Increase spacing for a cleaner look */
-  padding: 0 1rem; /* Add padding around the grid */
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+  gap: 2rem;
+  padding: 0 1rem;
 }
 
 .education-card {
@@ -69,7 +77,7 @@ h2 {
 }
 
 .edu-logo {
-  width: 100px; /* Slightly larger logos for better visual balance */
+  width: 100px;
   height: auto;
   margin-bottom: 1rem;
 }

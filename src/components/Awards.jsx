@@ -1,5 +1,5 @@
 import React from 'react';
-import './Awards.css'; // Import the CSS file for styling
+import './Awards.css';
 
 const Awards = () => {
   const awards = [
