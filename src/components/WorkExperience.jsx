@@ -9,6 +9,7 @@ const WorkExperience = () => {
       description:
         'Led engaging sessions in LEGO robotics, Roblox development, web development, and stop-motion animation for students aged 5–16. Created a supportive environment that inspired student growth in both technical skills and teamwork.',
     },
+
     {
       title: 'Mentor at Kumon',
       description:
