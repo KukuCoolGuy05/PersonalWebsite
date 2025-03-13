@@ -9,9 +9,12 @@ const courses = [
   { name: "AP Physics 1", institution: "Stevenson High School, Lincolnshire, IL" },
   { name: "AP Physics C", institution: "Stevenson High School, Lincolnshire, IL" },
   { name: "Discrete Mathematics (MATH 240)", institution: "University of Wisconsin-Madison" },
-  { name: "Introduction to Optimization (CS 524)", institution: "University of Wisconsin-Madison" },
   { name: "Programming II (CS 300)", institution: "University of Wisconsin-Madison" },
   { name: "Programming III (CS 400)", institution: "University of Wisconsin-Madison" },
+  { name: "Introduction To Computer Engineering (CS 252)", institution: "University of Wisconsin-Madison" },
+  { name: "Machine Organization And Programming (CS 354)", institution: "University of Wisconsin-Madison" },
+  { name: "Introduction to Optimization (CS 524)", institution: "University of Wisconsin-Madison" },
+  { name: "Introduction To Algorithms (CS 577)", institution: "University of Wisconsin-Madison" },
   { name: "Topics in Multi-Variable Calculus and Differential Equations (MATH 376)", institution: "University of Wisconsin-Madison" },
   { name: "Topics in Multi-Variable Calculus and Linear Algebra (MATH 375)", institution: "University of Wisconsin-Madison" },
 ];
