@@ -1,0 +1,106 @@
+/* ─────────────────────────────────────────────────────────────
+   Midnight Bloom — design tokens
+   One accent (kurinji violet), warm neutrals, dark by default.
+   Every color in the app comes from here, so re-theming is a
+   one-file change.
+   ───────────────────────────────────────────────────────────── */
+
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #0b0b0f;
+  --bg-soft: #0f0f15;
+  --surface: #13131a;
+  --surface-2: #191921;
+  --surface-3: #212129;
+
+  --line: rgba(242, 240, 235, 0.08);
+  --line-2: rgba(242, 240, 235, 0.14);
+  --line-3: rgba(242, 240, 235, 0.26);
+
+  --text: #f2f0eb;
+  --text-2: #b9b7c0;
+  --text-3: #86848f;
+
+  --accent: #8c7cff;
+  --accent-hi: #b3a8ff;
+  --accent-ink: #0b0b0f;
+  --accent-soft: rgba(140, 124, 255, 0.12);
+  --accent-line: rgba(140, 124, 255, 0.38);
+  --glow: rgba(140, 124, 255, 0.26);
+
+  --easy: #4fd1a5;
+  --medium: #f5b94a;
+  --hard: #ff7a7a;
+
+  --code-kw: #b3a8ff;
+  --code-str: #7ee2b8;
+  --code-num: #f5b94a;
+  --code-fn: #7cc4ff;
+  --code-type: #ff9ecf;
+  --code-cmt: #6f6d78;
+
+  --shadow: 0 40px 90px -30px rgba(0, 0, 0, 0.7);
+  --shadow-sm: 0 12px 30px -12px rgba(0, 0, 0, 0.6);
+  --grain-opacity: 0.07;
+  --scrim: rgba(5, 5, 8, 0.62);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #f4f2ee;
+  --bg-soft: #efece6;
+  --surface: #ffffff;
+  --surface-2: #f8f6f2;
+  --surface-3: #eeebe5;
+
+  --line: rgba(17, 17, 22, 0.08);
+  --line-2: rgba(17, 17, 22, 0.14);
+  --line-3: rgba(17, 17, 22, 0.26);
+
+  --text: #111116;
+  --text-2: #4a4852;
+  --text-3: #6b6973;
+
+  --accent: #5b47ff;
+  --accent-hi: #4433e6;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(91, 71, 255, 0.09);
+  --accent-line: rgba(91, 71, 255, 0.32);
+  --glow: rgba(91, 71, 255, 0.14);
+
+  --easy: #0f9f6e;
+  --medium: #b7791f;
+  --hard: #d64545;
+
+  --code-kw: #5b47ff;
+  --code-str: #0f8a5f;
+  --code-num: #b46b00;
+  --code-fn: #1d64c7;
+  --code-type: #b3246b;
+  --code-cmt: #8a8894;
+
+  --shadow: 0 40px 80px -40px rgba(40, 30, 90, 0.28);
+  --shadow-sm: 0 12px 30px -16px rgba(40, 30, 90, 0.25);
+  --grain-opacity: 0.045;
+  --scrim: rgba(30, 28, 40, 0.35);
+}
+
+:root {
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --radius-xl: 32px;
+  --radius-lg: 24px;
+  --radius: 16px;
+  --radius-sm: 10px;
+
+  --gutter: clamp(16px, 4vw, 48px);
+  --maxw: 1280px;
+}

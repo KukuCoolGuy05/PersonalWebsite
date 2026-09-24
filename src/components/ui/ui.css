@@ -1,0 +1,76 @@
+/* ── Modal shell ─────────────────────────────────────────── */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 130;
+  display: grid;
+  place-items: center;
+  padding: clamp(12px, 3vw, 40px);
+}
+
+.modal__scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--scrim);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.modal__panel {
+  position: relative;
+  width: min(1040px, 100%);
+  max-height: calc(100dvh - 2 * clamp(12px, 3vw, 40px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  outline: none;
+}
+
+.modal--drawer {
+  place-items: stretch end;
+  padding: 0;
+}
+
+.modal--drawer .modal__panel {
+  width: min(780px, 100%);
+  height: 100dvh;
+  max-height: none;
+  border-width: 0 0 0 1px;
+  border-radius: 0;
+}
+
+/* ── Confirm dialog ──────────────────────────────────────── */
+.confirm {
+  width: min(440px, 100%);
+  padding: 28px;
+  border-radius: var(--radius-lg);
+}
+
+.confirm__title {
+  font-size: 1.4rem;
+  letter-spacing: -0.03em;
+}
+
+.confirm__body {
+  margin-top: 10px;
+  color: var(--text-2);
+}
+
+.confirm__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.btn--danger {
+  background: var(--hard);
+  color: #fff;
+}
+
+.btn--danger:hover {
+  filter: brightness(1.1);
+}

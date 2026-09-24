@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kurinji Shivakumar — Software Engineer</title>
+    <meta
+      name="description"
+      content="Kurinji Shivakumar — Computer Science & Data Science at UW–Madison. Projects, awards, coursework and a searchable log of solved coding problems."
+    />
+    <meta name="theme-color" content="#0b0b0f" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Kurinji Shivakumar — Software Engineer" />
+    <meta
+      property="og:description"
+      content="Projects, awards, coursework and a searchable log of solved coding problems."
+    />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/logo192.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <script>
+      // Apply saved theme + motion preferences before first paint so nothing flashes.
+      (function () {
+        var root = document.documentElement;
+        var theme = null;
+        var motion = null;
+        try {
+          theme = localStorage.getItem('theme');
+          motion = localStorage.getItem('motion');
+        } catch (e) {}
+        if (theme === 'light' || theme === 'dark') root.dataset.theme = theme;
+        if (motion !== 'full' && motion !== 'reduce') {
+          motion = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'reduce' : 'full';
+        }
+        root.dataset.motion = motion;
+      })();
+    </script>
+  </head>
+  <body>
+    <noscript>This site needs JavaScript to run.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

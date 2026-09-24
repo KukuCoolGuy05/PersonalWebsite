@@ -1,0 +1,371 @@
+/* Shared frame for every project cover. */
+.art {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background:
+    radial-gradient(120% 90% at 100% 0%, var(--accent-soft), transparent 55%),
+    linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 28px 28px,
+    var(--bg-soft);
+  isolation: isolate;
+}
+
+@keyframes art-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes art-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--easy) 45%, transparent);
+  }
+  60% {
+    box-shadow: 0 0 0 7px transparent;
+  }
+}
+
+@keyframes art-bounce {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+/* ── Kalvi ─────────────────────────────────────────────── */
+.art--kalvi {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  font-size: 0.86rem;
+}
+
+.kalvi__head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.kalvi__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--easy);
+  animation: art-pulse 2s infinite;
+}
+
+.kalvi__name {
+  font-weight: 650;
+}
+
+.kalvi__status {
+  font-size: 0.76rem;
+  color: var(--text-3);
+}
+
+.kalvi__a11y {
+  height: 28px;
+  margin-left: auto;
+  padding: 0 10px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  transition: background-color 0.25s, color 0.25s, border-color 0.25s;
+}
+
+.kalvi__a11y:hover {
+  border-color: var(--line-3);
+}
+
+.kalvi__a11y.is-on {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.kalvi__chat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 10px;
+  min-height: 150px;
+  overflow: hidden;
+}
+
+.kalvi__history {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.kalvi__bubble {
+  max-width: 84%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  line-height: 1.45;
+  transition: letter-spacing 0.4s, word-spacing 0.4s, line-height 0.4s;
+}
+
+.kalvi__bubble--me {
+  align-self: flex-end;
+  border-bottom-right-radius: 6px;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.kalvi__bubble--ai {
+  align-self: flex-start;
+  border-bottom-left-radius: 6px;
+  background: var(--surface-3);
+}
+
+.is-a11y .kalvi__bubble {
+  letter-spacing: 0.05em;
+  word-spacing: 0.2em;
+  line-height: 1.8;
+}
+
+.kalvi__typing {
+  align-self: flex-start;
+  display: inline-flex;
+  gap: 4px;
+  background: var(--surface-3);
+  border-bottom-left-radius: 6px;
+}
+
+.kalvi__typing span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-2);
+  animation: art-bounce 1.1s infinite;
+}
+
+.kalvi__typing span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.kalvi__typing span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.kalvi__caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -2px;
+  background: currentColor;
+  animation: art-blink 1s steps(1) infinite;
+}
+
+.kalvi__profile {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.kalvi__profile-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.kalvi__note {
+  color: var(--accent);
+  letter-spacing: 0.02em;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.kalvi__meter {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.74rem;
+  color: var(--text-2);
+}
+
+.kalvi__track {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: var(--surface-3);
+}
+
+.kalvi__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.kalvi__fill.is-warn {
+  background: var(--hard);
+}
+
+/* ── Sign Language Reader ─────────────────────────────── */
+.art--sign {
+  display: flex;
+  flex-direction: column;
+}
+
+.sign__view {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  padding: 6px;
+}
+
+.sign__corner {
+  fill: none;
+  stroke: var(--text-3);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.sign__rec {
+  fill: var(--hard);
+  animation: art-blink 1.4s steps(1) infinite;
+}
+
+.sign__hud {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  fill: var(--text-3);
+}
+
+.sign__palm,
+.sign__finger {
+  fill: var(--surface-3);
+  stroke: var(--text-3);
+  stroke-width: 1.4;
+}
+
+.sign__box {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+  stroke-width: 1.6;
+}
+
+.sign__tag {
+  fill: var(--accent);
+}
+
+.sign__tag-text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  fill: var(--accent-ink);
+}
+
+.sign__ring-track {
+  fill: var(--surface);
+  stroke: var(--line-2);
+  stroke-width: 3;
+}
+
+.sign__ring {
+  fill: none;
+  stroke: var(--easy);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.sign__ring-text {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--text);
+}
+
+.sign__panel {
+  display: grid;
+  grid-template-columns: minmax(96px, auto) 1fr;
+  gap: 18px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.sign__panel-label {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.sign__word {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.sign__cursor {
+  display: inline-block;
+  width: 0.55em;
+  height: 2px;
+  margin-left: 2px;
+  background: var(--accent);
+  animation: art-blink 1s steps(1) infinite;
+}
+
+.sign__sentence span:last-child {
+  color: var(--medium);
+  letter-spacing: 0.06em;
+}
+
+/* ── Physics 3D ───────────────────────────────────────── */
+.art--field {
+  cursor: crosshair;
+}
+
+.field__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.field__hud {
+  position: absolute;
+  inset: auto 18px 14px 18px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--text-3);
+  pointer-events: none;
+}
