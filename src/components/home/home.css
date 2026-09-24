@@ -4,7 +4,8 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  min-height: 100svh;
+  /* Capped so tall screens don't open a big gap between the nav and the name. */
+  min-height: min(100svh, 880px);
   padding-top: 132px;
   padding-bottom: clamp(36px, 5vw, 64px);
   overflow: hidden;

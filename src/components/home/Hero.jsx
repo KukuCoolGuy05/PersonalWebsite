@@ -179,7 +179,7 @@ function Definition() {
       </p>
       <ol>
         <li>A mountain flower that blooms only once every twelve years.</li>
-        <li>An engineer who ships a little more often than that.</li>
+        <li>The Kuku coolest guy alive, trust.</li>
       </ol>
     </motion.aside>
   );
