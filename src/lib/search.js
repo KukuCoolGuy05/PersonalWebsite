@@ -84,14 +84,6 @@ export function filterProblems(problems, { query = '', tags = [], difficulty = '
   return matches.map((m) => m.problem);
 }
 
-export function countByTag(problems) {
-  const counts = new Map();
-  for (const problem of problems) {
-    for (const tag of problem.tags ?? []) counts.set(tag, (counts.get(tag) ?? 0) + 1);
-  }
-  return counts;
-}
-
 export function countByDifficulty(problems) {
   const counts = { Easy: 0, Medium: 0, Hard: 0 };
   for (const problem of problems) {

@@ -10,9 +10,10 @@ plus a light mode.
 - **Certificates & Awards:** featured wins (with a knight's-tour animation), certificates, and
   a filterable awards timeline
 - **Education:** schools and a filterable course grid
-- **Problems:** search, filter by data structure, difficulty and sort; each problem opens with
-  its question, key insight, approach and highlighted solutions. It's backed by Supabase, and
-  only you can add or edit.
+- **Coding:** a searchable log of solved coding problems. Filter by tag, difficulty and sort;
+  each problem opens with its question, key insight, approach and highlighted solutions. New tags
+  (with a color) can be created right on the page. It's backed by Supabase, and only you can add
+  or edit.
 
 ## Current Tech Stack
 
@@ -24,12 +25,12 @@ react-markdown · highlight.js · Geist, Geist Mono and Instrument Serif
 ```
 src/
   data/          ← all personal content (edit these)
-  pages/         Home, Achievements, Education, Problems, NotFound
+  pages/         Home, Achievements, Education, Problems (the Coding page), NotFound
   components/
     home/        hero, project stack + animated covers, sections
-    problems/    list cards, detail drawer, add/edit form, code blocks
+    problems/    list cards, detail drawer, add/edit form, tag manager, code blocks
     layout/      nav, footer, page transitions, smooth scroll
-    motion/      reveal, magnetic, tilt, counters, marquee
+    motion/      reveal, magnetic, tilt, counters
     ui/          modal, bloom logo, icons, segmented control
   lib/           search, Supabase client + API, hooks, theme & motion prefs
   styles/        design tokens (tokens.css) + global styles

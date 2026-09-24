@@ -1,12 +1,15 @@
 import { supabase, isSupabaseConfigured } from './supabase';
 import { SAMPLE_PROBLEMS } from '../data/sampleProblems';
+import { DSA_TAGS } from '../data/dsaTags';
 
 // 'supabase' when keys are configured; otherwise 'local' (sample data kept in
 // this browser's localStorage so the page is fully usable before setup).
 export const DATA_MODE = isSupabaseConfigured ? 'supabase' : 'local';
 
 const TABLE = 'problems';
+const TAGS_TABLE = 'tags';
 const LOCAL_KEY = 'problems:v1';
+const LOCAL_TAGS_KEY = 'tags:v1';
 
 // ── Row mapping (database snake_case ↔ app camelCase) ───────
 function fromRow(row) {
@@ -44,30 +47,43 @@ function toRow(problem) {
   };
 }
 
-// ── Local fallback ──────────────────────────────────────────
-function readLocal() {
-  try {
-    const saved = localStorage.getItem(LOCAL_KEY);
-    if (saved) return JSON.parse(saved);
-  } catch {
-    // Storage blocked or corrupted — fall back to the samples.
-  }
-  return SAMPLE_PROBLEMS;
+function tagFromRow(row) {
+  return { name: row.name, hue: row.hue, description: row.description ?? '' };
 }
 
-function writeLocal(problems) {
+// ── Local fallback ──────────────────────────────────────────
+function readStore(key, fallback) {
   try {
-    localStorage.setItem(LOCAL_KEY, JSON.stringify(problems));
+    const saved = localStorage.getItem(key);
+    if (saved) return JSON.parse(saved);
+  } catch {
+    // Storage blocked or corrupted — fall back to the defaults.
+  }
+  return fallback();
+}
+
+function writeStore(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
   } catch {
     // Storage unavailable (private mode): changes last until reload.
   }
 }
 
+const readLocal = () => readStore(LOCAL_KEY, () => SAMPLE_PROBLEMS);
+const writeLocal = (problems) => writeStore(LOCAL_KEY, problems);
+const readLocalTags = () => readStore(LOCAL_TAGS_KEY, () => DSA_TAGS.map(({ name, hue, description }) => ({ name, hue, description })));
+const writeLocalTags = (tags) => writeStore(LOCAL_TAGS_KEY, tags);
+
 function newId() {
   return globalThis.crypto?.randomUUID?.() ?? `local-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-// ── Public API (all take/return the app shape) ──────────────
+function notAllowed() {
+  return Object.assign(new Error('not allowed'), { code: 'NOT_ALLOWED' });
+}
+
+// ── Problems (all take/return the app shape) ────────────────
 export async function listProblems() {
   if (DATA_MODE === 'local') return readLocal();
   const { data, error } = await supabase
@@ -77,13 +93,6 @@ export async function listProblems() {
     .order('created_at', { ascending: false });
   if (error) throw error;
   return data.map(fromRow);
-}
-
-export async function countProblems() {
-  if (DATA_MODE === 'local') return readLocal().length;
-  const { count, error } = await supabase.from(TABLE).select('id', { count: 'exact', head: true });
-  if (error) throw error;
-  return count ?? 0;
 }
 
 export async function createProblem(problem) {
@@ -122,26 +131,72 @@ export async function deleteProblem(id) {
   if (!data.length) throw notAllowed();
 }
 
-function notAllowed() {
-  return Object.assign(new Error('not allowed'), { code: 'NOT_ALLOWED' });
+// ── Tags ────────────────────────────────────────────────────
+export async function listTags() {
+  if (DATA_MODE === 'local') return readLocalTags();
+  const { data, error } = await supabase
+    .from(TAGS_TABLE)
+    .select('name, hue, description')
+    .order('created_at')
+    .order('name');
+  if (error) throw error;
+  return data.map(tagFromRow);
 }
 
-export function resetLocalProblems() {
+export async function createTag({ name, hue, description = '' }) {
+  if (DATA_MODE === 'local') {
+    const tags = readLocalTags();
+    const lower = name.toLowerCase();
+    if (tags.some((t) => t.name.toLowerCase() === lower)) {
+      throw Object.assign(new Error('duplicate tag'), { code: '23505' });
+    }
+    const created = { name, hue, description };
+    writeLocalTags([...tags, created]);
+    return created;
+  }
+  const { data, error } = await supabase.from(TAGS_TABLE).insert({ name, hue, description }).select('name, hue, description');
+  if (error) throw error;
+  return tagFromRow(data[0]);
+}
+
+export async function deleteTag(name) {
+  if (DATA_MODE === 'local') {
+    writeLocalTags(readLocalTags().filter((t) => t.name !== name));
+    return;
+  }
+  const { data, error } = await supabase.from(TAGS_TABLE).delete().eq('name', name).select('name');
+  if (error) throw error;
+  if (!data.length) throw notAllowed();
+}
+
+// Demo mode: put the sample problems and starter tags back.
+export function resetLocalData() {
   try {
     localStorage.removeItem(LOCAL_KEY);
+    localStorage.removeItem(LOCAL_TAGS_KEY);
   } catch {
     // ignore
   }
+}
+
+// ── Errors ──────────────────────────────────────────────────
+// PostgREST reports a table that hasn't been created (schema.sql not run yet).
+export function isMissingTable(error) {
+  return error?.code === 'PGRST205' || error?.code === '42P01';
 }
 
 // Turn Supabase/PostgREST errors into something readable.
 export function describeError(error) {
   if (!error) return '';
   if (error.code === '42501' || /row-level security/i.test(error.message ?? '')) {
-    return 'Supabase refused the change — this account isn’t on the admins list (see SETUP.md, step 4).';
+    return 'Supabase refused the change — this account isn’t on the admins list yet.';
   }
   if (error.code === 'NOT_ALLOWED') {
-    return 'Nothing changed — the problem was already deleted, or this account isn’t on the admins list.';
+    return 'Nothing changed — it was already deleted, or this account isn’t on the admins list.';
+  }
+  if (error.code === '23505') return 'A tag with that name already exists.';
+  if (isMissingTable(error)) {
+    return 'That table isn’t set up yet — run the latest supabase/schema.sql in Supabase’s SQL Editor.';
   }
   if (/Failed to fetch|NetworkError/i.test(error.message ?? '')) return 'Couldn’t reach Supabase. Check your connection.';
   return error.message || 'Something went wrong.';

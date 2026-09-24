@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react';
-import { Route, Routes, useLocation } from 'react-router';
+import { Navigate, Route, Routes, useLocation, useParams } from 'react-router';
 import { AnimatePresence, MotionConfig, motion, useScroll, useSpring } from 'motion/react';
 import { useLenis } from 'lenis/react';
 
@@ -18,6 +18,13 @@ import './components/layout/layout.css';
 const loadProblems = () => import('./pages/Problems');
 const Problems = lazy(loadProblems);
 
+// The coding page used to live at /problems; keep old links working.
+function LegacyProblemsRedirect() {
+  const { problemId } = useParams();
+  const { search } = useLocation();
+  return <Navigate replace to={{ pathname: problemId ? `/coding/${problemId}` : '/coding', search }} />;
+}
+
 function ScrollProgress() {
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 220, damping: 30, restDelta: 0.001 });
@@ -27,8 +34,10 @@ function ScrollProgress() {
 function Shell() {
   const location = useLocation();
   const lenis = useLenis();
-  // Key on the first path segment so /problems → /problems/:id doesn't replay the page transition.
-  const pageKey = location.pathname.split('/')[1] || 'home';
+  // Key on the first path segment so /coding → /coding/:id doesn't replay the page transition
+  // (and the /problems redirect doesn't either).
+  const segment = location.pathname.split('/')[1] || 'home';
+  const pageKey = segment === 'problems' ? 'coding' : segment;
 
   const resetScroll = () => {
     lenis?.scrollTo(0, { immediate: true, force: true });
@@ -54,13 +63,14 @@ function Shell() {
             <Route path="/achievements" element={<Achievements />} />
             <Route path="/education" element={<Education />} />
             <Route
-              path="/problems/:problemId?"
+              path="/coding/:problemId?"
               element={
                 <Suspense fallback={<div className="curtain" aria-hidden="true" />}>
                   <Problems />
                 </Suspense>
               }
             />
+            <Route path="/problems/:problemId?" element={<LegacyProblemsRedirect />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </ErrorBoundary>

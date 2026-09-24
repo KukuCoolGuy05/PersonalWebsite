@@ -8,16 +8,24 @@ import { Counter } from '../components/motion/Interactive';
 import { Reveal, EASE_OUT } from '../components/motion/Reveal';
 import Modal, { ConfirmDialog } from '../components/ui/Modal';
 import Segmented from '../components/ui/Segmented';
+import AccessBanner from '../components/problems/AccessBanner';
 import ProblemDetail from '../components/problems/ProblemDetail';
 import ProblemForm from '../components/problems/ProblemForm';
 import SignInDialog from '../components/problems/SignInDialog';
-import { ProblemCard, SkeletonCard, TagChip } from '../components/problems/ProblemParts';
-import { DIFFICULTIES, DSA_TAGS } from '../data/dsaTags';
-import { countByDifficulty, countByTag, filterProblems, tokenize } from '../lib/search';
-import { DATA_MODE, describeError, resetLocalProblems } from '../lib/problemsApi';
+import TagManager from '../components/problems/TagManager';
+import { ProblemCard, SkeletonCard, TagChip, TagHues } from '../components/problems/ProblemParts';
+import { DIFFICULTIES, DSA_TAGS, tagHue } from '../data/dsaTags';
+import { countByDifficulty, filterProblems, tokenize } from '../lib/search';
+import { DATA_MODE, describeError, isMissingTable, resetLocalData } from '../lib/problemsApi';
+import { findTag, mergeTags } from '../lib/tags';
 import { useAdmin } from '../lib/useAdmin';
 import { useProblems } from '../lib/useProblems';
+import { useTags } from '../lib/useTags';
 import '../components/problems/problems.css';
+
+// Where this page lives (old /problems links redirect here — see App.jsx).
+const BASE = '/coding';
+const NO_TAGS = [];
 
 const SORTS = [
   { value: 'newest', label: 'Newest first' },
@@ -25,6 +33,8 @@ const SORTS = [
   { value: 'difficulty', label: 'Easiest first' },
   { value: 'title', label: 'A → Z' },
 ];
+
+const sameName = (a, b) => a.toLowerCase() === b.toLowerCase();
 
 // Search + filters live in the URL (?q=&tags=&difficulty=&sort=) so views are shareable.
 function useFilters() {
@@ -58,9 +68,6 @@ function useFilters() {
 function Stats({ problems }) {
   const total = problems.length;
   const byDifficulty = countByDifficulty(problems);
-  const tagCounts = countByTag(problems);
-  const covered = DSA_TAGS.filter((t) => tagCounts.get(t.name)).length;
-  const top = [...tagCounts.entries()].sort((a, b) => b[1] - a[1])[0];
 
   return (
     <Reveal className="pstats">
@@ -91,15 +98,6 @@ function Stats({ problems }) {
           ))}
         </div>
       </div>
-      <div className="pstat">
-        <span className="pstat__value">
-          <Counter value={covered} />
-          <small>/{DSA_TAGS.length}</small>
-        </span>
-        <span className="pstat__label">
-          data structures practiced{top ? ` · most: ${top[0]}` : ''}
-        </span>
-      </div>
     </Reveal>
   );
 }
@@ -109,14 +107,23 @@ export default function Problems() {
   const navigate = useNavigate();
   const location = useLocation();
   const { status, problems, error, reload, create, update, remove } = useProblems();
+  const tagStore = useTags();
   const admin = useAdmin();
   const [filters, setFilters] = useFilters();
   const [editing, setEditing] = useState(null); // null | { problem?: object }
   const [signingIn, setSigningIn] = useState(false);
+  const [managingTags, setManagingTags] = useState(false);
   const [deleting, setDeleting] = useState(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [toast, setToast] = useState(null);
   const searchRef = useRef(null);
+
+  // Saved tags come from the tags table; if it isn't set up yet, show the starter set.
+  const tagsMissing = tagStore.status === 'error' && isMissingTable(tagStore.error);
+  const savedTags =
+    tagStore.status === 'ready' ? tagStore.tags : tagStore.status === 'error' ? DSA_TAGS : NO_TAGS;
+  const allTags = useMemo(() => mergeTags(savedTags, problems), [savedTags, problems]);
+  const hueMap = useMemo(() => new Map(allTags.map((t) => [t.name.toLowerCase(), t.hue])), [allTags]);
 
   const tagKey = filters.tags.join(',');
   const terms = useMemo(() => tokenize(filters.query), [filters.query]);
@@ -125,23 +132,17 @@ export default function Problems() {
     () => filterProblems(problems, filters),
     [problems, filters.query, tagKey, filters.difficulty, filters.sort]
   );
-  const tagCounts = useMemo(() => countByTag(problems), [problems]);
-  const tagNames = useMemo(() => {
-    const names = DSA_TAGS.map((t) => t.name);
-    for (const tag of tagCounts.keys()) if (!names.includes(tag)) names.push(tag);
-    return names;
-  }, [tagCounts]);
 
   const selected = problemId ? problems.find((p) => p.id === problemId) : null;
   const pool = selected && results.some((p) => p.id === selected.id) ? results : problems;
   const position = selected ? pool.findIndex((p) => p.id === selected.id) : -1;
 
-  const openProblem = (id) => navigate({ pathname: `/problems/${id}`, search: location.search });
-  const closeProblem = () => navigate({ pathname: '/problems', search: location.search });
+  const openProblem = (id) => navigate({ pathname: `${BASE}/${id}`, search: location.search });
+  const closeProblem = () => navigate({ pathname: BASE, search: location.search });
   const step = (dir) => {
     if (!pool.length) return;
     const next = pool[(position + dir + pool.length) % pool.length];
-    navigate({ pathname: `/problems/${next.id}`, search: location.search }, { replace: true });
+    navigate({ pathname: `${BASE}/${next.id}`, search: location.search }, { replace: true });
   };
 
   const notify = (text) => setToast({ id: Date.now(), text });
@@ -155,7 +156,7 @@ export default function Problems() {
   // A link to a problem that no longer exists falls back to the list.
   useEffect(() => {
     if (status === 'ready' && problemId && !selected) {
-      navigate({ pathname: '/problems', search: location.search }, { replace: true });
+      navigate({ pathname: BASE, search: location.search }, { replace: true });
     }
   }, [status, problemId, selected, navigate, location.search]);
 
@@ -174,18 +175,27 @@ export default function Problems() {
     return () => window.removeEventListener('keydown', onKey);
   });
 
-  const save = async (data) => {
-    if (editing?.problem) {
-      const saved = await update(editing.problem.id, data);
-      setEditing(null);
-      notify('Changes saved');
-      navigate({ pathname: `/problems/${saved.id}`, search: location.search }, { replace: true });
-    } else {
-      const saved = await create(data);
-      setEditing(null);
-      notify('Problem added');
-      navigate({ pathname: `/problems/${saved.id}`, search: location.search });
+  // New tag names typed into the problem form join the saved list, in the color they
+  // were already shown in. Best effort: the problem itself is saved either way.
+  const saveNewTags = async (names) => {
+    if (tagStore.status !== 'ready') return;
+    for (const name of names) {
+      if (findTag(tagStore.tags, name)) continue;
+      try {
+        await tagStore.create({ name, hue: tagHue(name), description: '' });
+      } catch {
+        // e.g. created in another tab meanwhile — nothing to do.
+      }
     }
+  };
+
+  const save = async (data) => {
+    const saved = editing?.problem ? await update(editing.problem.id, data) : await create(data);
+    await saveNewTags(data.tags);
+    const wasEditing = Boolean(editing?.problem);
+    setEditing(null);
+    notify(wasEditing ? 'Changes saved' : 'Problem added');
+    navigate({ pathname: `${BASE}/${saved.id}`, search: location.search }, { replace: wasEditing });
   };
 
   const confirmDelete = async () => {
@@ -202,45 +212,45 @@ export default function Problems() {
     }
   };
 
+  const createTag = async (tag) => {
+    await tagStore.create(tag);
+    notify(`Tag “${tag.name}” created`);
+  };
+
+  const deleteTag = async (name) => {
+    await tagStore.remove(name);
+    if (filters.tags.some((t) => sameName(t, name))) setFilters({ tags: filters.tags.filter((t) => !sameName(t, name)) });
+    notify(`Tag “${name}” deleted`);
+  };
+
+  const recheckAccess = async () => {
+    const ok = await admin.recheck();
+    if (ok) notify('You can edit now');
+    return ok;
+  };
+
   const filtersActive = filters.query || filters.tags.length || filters.difficulty !== 'All';
   const clearFilters = () => setFilters({ query: '', tags: [], difficulty: 'All' });
-  const toggleTag = (tag) =>
-    setFilters({ tags: filters.tags.includes(tag) ? filters.tags.filter((t) => t !== tag) : [...filters.tags, tag] });
+  const tagSelected = (name) => filters.tags.some((t) => sameName(t, name));
+  const toggleTag = (name) =>
+    setFilters({ tags: tagSelected(name) ? filters.tags.filter((t) => !sameName(t, name)) : [...filters.tags, name] });
 
   const difficultyOptions = [
     { value: 'All', label: 'All' },
     ...DIFFICULTIES.map((level) => ({ value: level, label: level })),
   ];
 
+  const signedInWithoutAccess = DATA_MODE === 'supabase' && admin.ready && admin.user && !admin.isAdmin;
+
   let adminControls = null;
   if (admin.isAdmin) {
     adminControls = (
-      <>
-        <button type="button" className="btn btn--accent btn--sm" onClick={() => setEditing({})}>
-          <Plus /> New problem
-        </button>
-        {admin.user && (
-          <button
-            type="button"
-            className="icon-btn"
-            onClick={admin.signOut}
-            aria-label={`Sign out ${admin.user.email}`}
-            title={`Signed in as ${admin.user.email} — sign out`}
-          >
-            <LogOut />
-          </button>
-        )}
-      </>
+      <button type="button" className="btn btn--accent btn--sm" onClick={() => setEditing({})}>
+        <Plus /> New problem
+      </button>
     );
-  } else if (DATA_MODE === 'supabase' && admin.ready) {
-    adminControls = admin.user ? (
-      <span className="ptoolbar__note">
-        {admin.user.email} can’t edit
-        <button type="button" className="icon-btn" onClick={admin.signOut} aria-label="Sign out">
-          <LogOut />
-        </button>
-      </span>
-    ) : (
+  } else if (DATA_MODE === 'supabase' && admin.ready && !admin.user) {
+    adminControls = (
       <button
         type="button"
         className="icon-btn"
@@ -252,195 +262,234 @@ export default function Problems() {
       </button>
     );
   }
+  const signOutButton = admin.user && (
+    <button
+      type="button"
+      className="icon-btn"
+      onClick={admin.signOut}
+      aria-label={`Sign out ${admin.user.email}`}
+      title={`Signed in as ${admin.user.email} — sign out`}
+    >
+      <LogOut />
+    </button>
+  );
 
   return (
-    <PageTransition label="Problems">
-      <PageHeader
-        index="04"
-        label="Coding problems"
-        title="Coding *problems*"
-        lede="A searchable log of the problems I’ve worked through — the question, the key insight, and the code that solved it."
-      />
+    <PageTransition label="Coding">
+      <PageHeader index="04" label="Coding" title="Coding *problems*" />
 
-      <section className="container problems" aria-label="Problem log">
-        {DATA_MODE === 'local' && admin.isAdmin && (
-          <Reveal className="pbanner">
-            <p>
-              <strong>Demo mode.</strong> Supabase isn’t connected yet, so problems are saved in this browser only. Follow{' '}
-              <code className="inline-code">SETUP.md</code> to connect your database.
-            </p>
-            <button
-              type="button"
-              className="btn btn--ghost btn--sm"
-              onClick={() => {
-                resetLocalProblems();
-                reload();
-                notify('Sample problems restored');
-              }}
-            >
-              <RotateCcw /> Reset samples
-            </button>
-          </Reveal>
-        )}
-
-        <Stats problems={problems} />
-
-        <Reveal className="ptoolbar" delay={0.1}>
-          <label className="psearch">
-            <Search className="psearch__icon" aria-hidden="true" />
-            <span className="sr-only">Search problems</span>
-            <input
-              ref={searchRef}
-              type="search"
-              value={filters.query}
-              onChange={(e) => setFilters({ query: e.target.value })}
-              placeholder="Search titles, tags, insights or code…"
-              autoComplete="off"
-              spellCheck={false}
-            />
-            {filters.query ? (
-              <button type="button" className="psearch__clear" onClick={() => setFilters({ query: '' })} aria-label="Clear search">
-                <X />
+      <TagHues.Provider value={hueMap}>
+        <section className="container problems" aria-label="Problem log">
+          {DATA_MODE === 'local' && admin.isAdmin && (
+            <Reveal className="pbanner">
+              <p>
+                <strong>Demo mode.</strong> Supabase isn’t connected, so problems and tags are saved in this browser
+                only. Add your Supabase keys to <code className="inline-code">.env.local</code> to use your database.
+              </p>
+              <button
+                type="button"
+                className="btn btn--ghost btn--sm"
+                onClick={() => {
+                  resetLocalData();
+                  reload();
+                  tagStore.reload();
+                  notify('Sample problems restored');
+                }}
+              >
+                <RotateCcw /> Reset samples
               </button>
-            ) : (
-              <kbd className="psearch__kbd" aria-hidden="true">
-                /
-              </kbd>
-            )}
-          </label>
-          <Segmented
-            id="difficulty"
-            label="Filter by difficulty"
-            options={difficultyOptions}
-            value={filters.difficulty}
-            onChange={(difficulty) => setFilters({ difficulty })}
-          />
-          <select
-            className="select psort"
-            value={filters.sort}
-            onChange={(e) => setFilters({ sort: e.target.value })}
-            aria-label="Sort problems"
-          >
-            {SORTS.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
-              </option>
-            ))}
-          </select>
-          <div className="ptoolbar__admin">{adminControls}</div>
-        </Reveal>
-
-        <Reveal className="ptags" delay={0.15} role="group" aria-label="Filter by data structure">
-          {tagNames.map((tag) => (
-            <TagChip
-              key={tag}
-              name={tag}
-              as="button"
-              type="button"
-              aria-pressed={filters.tags.includes(tag)}
-              onClick={() => toggleTag(tag)}
-              title={DSA_TAGS.find((t) => t.name === tag)?.description}
-            >
-              <span className="chip__count">{tagCounts.get(tag) ?? 0}</span>
-            </TagChip>
-          ))}
-        </Reveal>
-
-        <div className="presults">
-          <p className="presults__count" aria-live="polite">
-            {status === 'ready' &&
-              (filtersActive
-                ? `${results.length} of ${problems.length} problems match`
-                : `${problems.length} problem${problems.length === 1 ? '' : 's'}`)}
-          </p>
-          {filtersActive && (
-            <button type="button" className="presults__clear" onClick={clearFilters}>
-              Clear filters
-            </button>
+            </Reveal>
           )}
-        </div>
 
-        {status === 'loading' && (
-          <ul className="pgrid" aria-busy="true">
-            {[0, 1, 2, 3].map((i) => (
-              <SkeletonCard key={i} />
-            ))}
-          </ul>
-        )}
+          {signedInWithoutAccess && <AccessBanner user={admin.user} onRecheck={recheckAccess} />}
 
-        {status === 'error' && (
-          <div className="pempty" role="alert">
-            <p className="pempty__title">Couldn’t load problems.</p>
-            <p>{describeError(error)}</p>
-            <button type="button" className="btn btn--ghost btn--sm" onClick={reload}>
-              <RotateCcw /> Try again
-            </button>
-          </div>
-        )}
+          <Stats problems={problems} />
 
-        {status === 'ready' && results.length > 0 && (
-          <motion.ul layout className="pgrid">
-            <AnimatePresence mode="popLayout">
-              {results.map((problem) => (
-                <ProblemCard key={problem.id} problem={problem} terms={terms} onOpen={openProblem} />
-              ))}
-            </AnimatePresence>
-          </motion.ul>
-        )}
-
-        {status === 'ready' && results.length === 0 && (
-          <div className="pempty">
-            {problems.length === 0 ? (
-              <>
-                <p className="pempty__title">No problems logged yet.</p>
-                {admin.isAdmin && (
-                  <button type="button" className="btn btn--accent btn--sm" onClick={() => setEditing({})}>
-                    <Plus /> Add your first problem
-                  </button>
-                )}
-              </>
-            ) : (
-              <>
-                <p className="pempty__title">
-                  Nothing matches{filters.query ? ` “${filters.query}”` : ' those filters'}.
-                </p>
-                <button type="button" className="btn btn--ghost btn--sm" onClick={clearFilters}>
-                  Clear filters
+          <Reveal className="ptoolbar" delay={0.1}>
+            <label className="psearch">
+              <Search className="psearch__icon" aria-hidden="true" />
+              <span className="sr-only">Search problems</span>
+              <input
+                ref={searchRef}
+                type="search"
+                value={filters.query}
+                onChange={(e) => setFilters({ query: e.target.value })}
+                placeholder="Search titles, tags, insights or code…"
+                autoComplete="off"
+                spellCheck={false}
+              />
+              {filters.query ? (
+                <button
+                  type="button"
+                  className="psearch__clear"
+                  onClick={() => setFilters({ query: '' })}
+                  aria-label="Clear search"
+                >
+                  <X />
                 </button>
-              </>
+              ) : (
+                <kbd className="psearch__kbd" aria-hidden="true">
+                  /
+                </kbd>
+              )}
+            </label>
+            <Segmented
+              id="difficulty"
+              label="Filter by difficulty"
+              options={difficultyOptions}
+              value={filters.difficulty}
+              onChange={(difficulty) => setFilters({ difficulty })}
+            />
+            <select
+              className="select psort"
+              value={filters.sort}
+              onChange={(e) => setFilters({ sort: e.target.value })}
+              aria-label="Sort problems"
+            >
+              {SORTS.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+            {(adminControls || signOutButton) && (
+              <div className="ptoolbar__admin">
+                {adminControls}
+                {signOutButton}
+              </div>
+            )}
+          </Reveal>
+
+          <Reveal className="ptags" delay={0.15} role="group" aria-label="Filter by tag">
+            {allTags.map((tag) => (
+              <TagChip
+                key={tag.name}
+                name={tag.name}
+                as="button"
+                type="button"
+                aria-pressed={tagSelected(tag.name)}
+                onClick={() => toggleTag(tag.name)}
+                title={tag.description || undefined}
+              >
+                <span className="chip__count">{tag.count}</span>
+              </TagChip>
+            ))}
+            {admin.isAdmin && tagStore.status !== 'loading' && (
+              <button type="button" className="tag tag--add" onClick={() => setManagingTags(true)}>
+                <Plus /> New tag
+              </button>
+            )}
+          </Reveal>
+
+          <div className="presults">
+            <p className="presults__count" aria-live="polite">
+              {status === 'ready' &&
+                (filtersActive
+                  ? `${results.length} of ${problems.length} problems match`
+                  : `${problems.length} problem${problems.length === 1 ? '' : 's'}`)}
+            </p>
+            {filtersActive && (
+              <button type="button" className="presults__clear" onClick={clearFilters}>
+                Clear filters
+              </button>
             )}
           </div>
-        )}
-      </section>
 
-      <AnimatePresence>
-        {selected && (
-          <Modal key="detail" variant="drawer" onClose={closeProblem} labelledBy="problem-title" className="pdrawer">
-            <ProblemDetail
-              problem={selected}
-              position={position}
-              total={pool.length}
-              onClose={closeProblem}
-              onStep={step}
-              isAdmin={admin.isAdmin}
-              onEdit={() => setEditing({ problem: selected })}
-              onDelete={() => setDeleting(selected)}
+          {status === 'loading' && (
+            <ul className="pgrid" aria-busy="true">
+              {[0, 1, 2, 3].map((i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </ul>
+          )}
+
+          {status === 'error' && (
+            <div className="pempty" role="alert">
+              <p className="pempty__title">Couldn’t load problems.</p>
+              <p>{describeError(error)}</p>
+              <button type="button" className="btn btn--ghost btn--sm" onClick={reload}>
+                <RotateCcw /> Try again
+              </button>
+            </div>
+          )}
+
+          {status === 'ready' && results.length > 0 && (
+            <motion.ul layout className="pgrid">
+              <AnimatePresence mode="popLayout">
+                {results.map((problem) => (
+                  <ProblemCard key={problem.id} problem={problem} terms={terms} onOpen={openProblem} />
+                ))}
+              </AnimatePresence>
+            </motion.ul>
+          )}
+
+          {status === 'ready' && results.length === 0 && (
+            <div className="pempty">
+              {problems.length === 0 ? (
+                <>
+                  <p className="pempty__title">No problems logged yet.</p>
+                  {admin.isAdmin && (
+                    <button type="button" className="btn btn--accent btn--sm" onClick={() => setEditing({})}>
+                      <Plus /> Add your first problem
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p className="pempty__title">
+                    Nothing matches{filters.query ? ` “${filters.query}”` : ' those filters'}.
+                  </p>
+                  <button type="button" className="btn btn--ghost btn--sm" onClick={clearFilters}>
+                    Clear filters
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </section>
+
+        <AnimatePresence>
+          {selected && (
+            <Modal key="detail" variant="drawer" onClose={closeProblem} labelledBy="problem-title" className="pdrawer">
+              <ProblemDetail
+                problem={selected}
+                position={position}
+                total={pool.length}
+                onClose={closeProblem}
+                onStep={step}
+                isAdmin={admin.isAdmin}
+                onEdit={() => setEditing({ problem: selected })}
+                onDelete={() => setDeleting(selected)}
+              />
+            </Modal>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {editing && (
+            <ProblemForm
+              key="form"
+              initial={editing.problem}
+              tags={allTags}
+              onSave={save}
+              onCancel={() => setEditing(null)}
             />
-          </Modal>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
 
-      <AnimatePresence>
-        {editing && (
-          <ProblemForm
-            key="form"
-            initial={editing.problem}
-            knownTags={tagNames}
-            onSave={save}
-            onCancel={() => setEditing(null)}
-          />
-        )}
-      </AnimatePresence>
+        <AnimatePresence>
+          {managingTags && (
+            <TagManager
+              key="tags"
+              tags={allTags}
+              unavailable={tagsMissing}
+              onCreate={createTag}
+              onDelete={deleteTag}
+              onClose={() => setManagingTags(false)}
+            />
+          )}
+        </AnimatePresence>
+      </TagHues.Provider>
 
       <AnimatePresence>
         {signingIn && <SignInDialog key="signin" onSignIn={admin.signIn} onClose={() => setSigningIn(false)} />}

@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, createContext, useContext } from 'react';
 import { motion } from 'motion/react';
 import { tagHue } from '../../data/dsaTags';
 import { escapeRegExp } from '../../lib/search';
@@ -11,9 +11,14 @@ export function DifficultyBadge({ level }) {
   return <span className={`diff diff--${level?.toLowerCase()}`}>{level}</span>;
 }
 
-export function TagChip({ name, as: Tag = 'span', children, ...rest }) {
+// Lowercased tag name → hue, from the saved tag list (provided by the Coding page).
+export const TagHues = createContext(null);
+
+export function TagChip({ name, hue, as: Tag = 'span', children, ...rest }) {
+  const hues = useContext(TagHues);
+  const h = hue ?? hues?.get(name.toLowerCase()) ?? tagHue(name);
   return (
-    <Tag className="tag" style={{ '--h': tagHue(name) }} {...rest}>
+    <Tag className="tag" style={{ '--h': h }} {...rest}>
       <span className="tag__dot" aria-hidden="true" />
       {name}
       {children}

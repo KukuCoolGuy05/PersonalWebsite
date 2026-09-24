@@ -13,7 +13,7 @@ export const NAV_LINKS = [
   { to: '/', label: 'Home' },
   { to: '/achievements', label: 'Certificates & Awards' },
   { to: '/education', label: 'Education' },
-  { to: '/problems', label: 'Problems' },
+  { to: '/coding', label: 'Coding' },
 ];
 
 function ThemeToggle() {

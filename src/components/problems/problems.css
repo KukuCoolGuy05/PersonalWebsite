@@ -26,7 +26,7 @@
 /* ── Stats ───────────────────────────────────────────────── */
 .pstats {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr);
   gap: 12px;
   margin-bottom: 12px;
 }
@@ -113,14 +113,9 @@
   background: var(--hard);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 700px) {
   .pstats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .pstat--wide {
-    grid-column: 1 / -1;
-    order: 3;
+    grid-template-columns: 1fr;
   }
 }
 
@@ -236,14 +231,6 @@
   height: 16px;
 }
 
-.ptoolbar__note {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.8rem;
-  color: var(--text-3);
-}
-
 .ptags {
   display: flex;
   flex-wrap: wrap;
@@ -321,6 +308,27 @@ button.tag[aria-pressed='true'] {
 
 .tag .chip__count {
   margin-left: 2px;
+}
+
+/* Admin-only "+ New tag" chip at the end of the filter row. */
+.tag--add {
+  border-style: dashed;
+  border-color: var(--accent-line);
+  color: var(--accent);
+}
+
+:root[data-theme='dark'] .tag--add {
+  color: var(--accent-hi);
+}
+
+.tag--add:hover {
+  border-style: solid;
+  background: var(--accent-soft);
+}
+
+.tag--add svg {
+  width: 13px;
+  height: 13px;
 }
 
 .diff {
@@ -1139,4 +1147,201 @@ button.tag[aria-pressed='true'] {
   border-radius: 4px;
   background: var(--accent-soft);
   color: var(--text);
+}
+
+/* ── Access banner (signed in, not an admin yet) ─────────── */
+.pbanner--access {
+  align-items: flex-start;
+}
+
+.pbanner__text {
+  display: grid;
+  flex: 1 1 420px;
+  gap: 8px;
+  min-width: 0;
+}
+
+.pbanner__text em {
+  font-style: normal;
+  color: var(--text);
+}
+
+.pbanner__sql {
+  display: block;
+  overflow-x: auto;
+  padding: 10px 12px;
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  background: var(--bg-soft);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.pbanner__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pbanner__actions .btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* ── Tag manager ─────────────────────────────────────────── */
+.tagman {
+  width: min(640px, 100%);
+}
+
+.tagman__head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 20px 16px 28px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.tagman__title {
+  margin-top: 4px;
+  font-size: 1.6rem;
+  letter-spacing: -0.035em;
+}
+
+.tagman__form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  padding: 24px 28px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tagman__notice {
+  margin: 24px 28px;
+  padding: 14px 16px;
+  border: 1px dashed var(--accent-line);
+  border-radius: 12px;
+  background: var(--accent-soft);
+  font-size: 0.9rem;
+  color: var(--text-2);
+}
+
+.field__label .field__hint {
+  margin-left: 6px;
+  font-weight: 400;
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.swatch {
+  width: 28px;
+  height: 28px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background: hsl(var(--h) 80% 68%);
+  box-shadow: inset 0 0 0 2px var(--surface);
+  transition: transform 0.25s var(--ease-out), border-color 0.2s;
+}
+
+:root[data-theme='light'] .swatch {
+  background: hsl(var(--h) 65% 48%);
+}
+
+.swatch:hover {
+  transform: scale(1.12);
+}
+
+.swatch[aria-checked='true'] {
+  border-color: var(--text);
+  transform: scale(1.12);
+}
+
+.tagman__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tagman__preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tagman__actions .btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.tagman__list {
+  display: grid;
+  gap: 10px;
+  padding: 20px 28px 28px;
+}
+
+.tagman__list ul {
+  display: grid;
+  list-style: none;
+}
+
+.tagman__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto 40px;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.tagman__desc {
+  overflow: hidden;
+  font-size: 0.82rem;
+  color: var(--text-3);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tagman__count {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.icon-btn[aria-disabled='true'] {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+@media (max-width: 560px) {
+  .tagman__form,
+  .tagman__list {
+    padding-inline: 20px;
+  }
+
+  .tagman__row {
+    grid-template-columns: auto minmax(0, 1fr) 40px;
+  }
+
+  .tagman__desc {
+    display: none;
+  }
+
+  .tagman__count {
+    justify-self: end;
+  }
 }

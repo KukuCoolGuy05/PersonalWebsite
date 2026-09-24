@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { countByDifficulty, countByTag, filterProblems, scoreProblem, tokenize } from './search';
+import { countByDifficulty, filterProblems, scoreProblem, tokenize } from './search';
 import { SAMPLE_PROBLEMS } from '../data/sampleProblems';
 
 const titles = (list) => list.map((p) => p.title);
@@ -73,10 +73,7 @@ describe('filterProblems', () => {
 });
 
 describe('counts', () => {
-  it('counts problems per tag and per difficulty', () => {
-    const tags = countByTag(SAMPLE_PROBLEMS);
-    expect(tags.get('Array')).toBe(2);
-    expect(tags.get('Trie')).toBe(1);
+  it('counts problems per difficulty', () => {
     expect(countByDifficulty(SAMPLE_PROBLEMS)).toEqual({ Easy: 3, Medium: 5, Hard: 1 });
   });
 });

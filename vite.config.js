@@ -13,6 +13,7 @@ export default defineConfig({
         manualChunks(id) {
           if (/[\\/]node_modules[\\/](react|react-dom|react-router|scheduler)[\\/]/.test(id)) return 'react';
           if (/[\\/]node_modules[\\/](motion|framer-motion|motion-dom|motion-utils|lenis)[\\/]/.test(id)) return 'motion';
+          if (/[\\/]node_modules[\\/]@supabase[\\/]/.test(id)) return 'supabase';
         },
       },
     },

@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react';
 import { AnimatePresence } from 'motion/react';
 import { Plus, Trash2, X } from 'lucide-react';
-import { DIFFICULTIES, DSA_TAGS, LANGUAGES, SOURCES } from '../../data/dsaTags';
+import { DIFFICULTIES, LANGUAGES, SOURCES } from '../../data/dsaTags';
 import { emptyProblem, emptySolution, normalizeProblem, toFormState, validateProblem } from '../../lib/problemModel';
 import { describeError } from '../../lib/problemsApi';
+import { MAX_TAG_LENGTH, normalizeTagName, validateTagName } from '../../lib/tags';
 import { guessFromUrl } from '../../lib/text';
 import Modal, { ConfirmDialog } from '../ui/Modal';
 import Markdown from './Markdown';
@@ -90,7 +91,8 @@ function FieldError({ id, message }) {
   );
 }
 
-export default function ProblemForm({ initial, knownTags, onSave, onCancel }) {
+// `tags` is the saved tag list; new names typed here join it when the problem is saved.
+export default function ProblemForm({ initial, tags, onSave, onCancel }) {
   const editing = Boolean(initial);
   const [form, setForm] = useState(() => (initial ? toFormState(initial) : emptyProblem()));
   const [errors, setErrors] = useState({});
@@ -98,6 +100,7 @@ export default function ProblemForm({ initial, knownTags, onSave, onCancel }) {
   const [saveError, setSaveError] = useState('');
   const [confirmDiscard, setConfirmDiscard] = useState(false);
   const [newTag, setNewTag] = useState('');
+  const [tagError, setTagError] = useState('');
   const start = useRef(JSON.stringify(form));
   const formRef = useRef(null);
 
@@ -111,10 +114,24 @@ export default function ProblemForm({ initial, knownTags, onSave, onCancel }) {
   const toggleTag = (tag) =>
     setForm((f) => ({ ...f, tags: f.tags.includes(tag) ? f.tags.filter((t) => t !== tag) : [...f.tags, tag] }));
 
+  // Saved tags, plus any new ones already picked for this problem.
+  const tagOptions = tags.map((t) => t.name);
+  for (const name of form.tags) {
+    if (!tagOptions.some((o) => o.toLowerCase() === name.toLowerCase())) tagOptions.push(name);
+  }
+
   const addCustomTag = () => {
-    const tag = newTag.trim();
-    if (tag && !form.tags.some((t) => t.toLowerCase() === tag.toLowerCase())) toggleTag(tag);
+    const clean = normalizeTagName(newTag);
+    const message = validateTagName(clean);
+    if (message) {
+      setTagError(message);
+      return;
+    }
+    // "heap" picks the existing "Heap" instead of making a near-duplicate.
+    const name = tagOptions.find((o) => o.toLowerCase() === clean.toLowerCase()) ?? clean;
+    if (!form.tags.includes(name)) toggleTag(name);
     setNewTag('');
+    setTagError('');
   };
 
   // Paste a LeetCode (etc.) link and the title + source fill themselves in.
@@ -143,8 +160,6 @@ export default function ProblemForm({ initial, knownTags, onSave, onCancel }) {
   };
 
   const requestClose = () => (dirty && !saving ? setConfirmDiscard(true) : onCancel());
-
-  const tagOptions = [...new Set([...DSA_TAGS.map((t) => t.name), ...knownTags, ...form.tags])];
 
   return (
     <Modal onClose={requestClose} labelledBy="problem-form-title" className="pform">
@@ -285,20 +300,30 @@ export default function ProblemForm({ initial, knownTags, onSave, onCancel }) {
                 <input
                   className="input"
                   value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
+                  onChange={(e) => {
+                    setNewTag(e.target.value);
+                    setTagError('');
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       addCustomTag();
                     }
                   }}
-                  placeholder="Add another tag (e.g. Two Pointers)"
+                  placeholder="New tag (e.g. Two Pointers)"
                   aria-label="New tag name"
+                  maxLength={MAX_TAG_LENGTH}
+                  aria-invalid={Boolean(tagError) || undefined}
                 />
                 <button type="button" className="btn btn--ghost btn--sm" onClick={addCustomTag} disabled={!newTag.trim()}>
                   <Plus /> Add tag
                 </button>
               </div>
+              {tagError ? (
+                <p className="field__error">{tagError}</p>
+              ) : (
+                <span className="field__hint">New tags join your tag list when you save.</span>
+              )}
             </div>
           </fieldset>
 
